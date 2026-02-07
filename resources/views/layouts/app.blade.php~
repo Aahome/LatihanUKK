@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <!-- memanggil nama title didalam file login/signin -->
+    <title>@yield('title')</title>
+    <!-- Memuat file CSS dan JavaScript menggunakan Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body @auth class="bg-slate-100 min-h-screen text-slate-700 flex {{ request()->routeIs('home') ? 'flex-col' : '' }}">
+
+    <!-- memanggil dan menampilkan file Sidebar untuk dashboard didalam folder partials sesuai role user yang telah login -->
+    {{-- ================= AUTHENTICATED USER ================= --}}
+        @php
+            $role = auth()->user()->role->role_name;
+        @endphp
+
+        @if (request()->routeIs('admin.*','staff.*','borrower.*'))
+
+            <!-- kondisi pengecekan role sebelum menampilkan sidebar pada dashboard -->
+            @if ($role === 'admin')
+                @include('partials.sidebar-admin')
+            @elseif ($role === 'staff')
+                @include('partials.sidebar-staff')
+            @elseif ($role === 'borrower')
+                @include('partials.sidebar-borrower')
+            @endif
+
+            @yield('dashboard-content')
+        @elseif (request()->routeIs('home'))
+            <!-- memanggil dan menampilkan file Navbar didalam folder partials -->
+            @include('partials.navbar')
+            <!-- memanggil konten didalam file home (halaman utama) -->
+            @yield('main-content')
+            <!--  memanggil dan menampilkan file Footer didalam folder partials  -->
+            @include('partials.footer')
+        @endif
+    @endauth
+
+    {{-- ================= GUEST (NOT LOGGED IN) ================= --}}
+    @guest
+        @if (request()->routeIs('login'))
+            <!-- memanggil konten didalam file login/signin -->
+            @yield('auth-content')
+        @elseif (request()->routeIs('home'))
+            <!-- memanggil dan menampilkan file Navbar didalam folder partials -->
+            @include('partials.navbar')
+            <!-- memanggil konten didalam file home (halaman utama) -->
+            @yield('main-content')
+            <!--  memanggil dan menampilkan file Footer didalam folder partials  -->
+            @include('partials.footer')
+        @endif
+    @endguest
+</body>
+
+</html>
+<script>
+    function toggleProfileMenu() {
+        document.getElementById('profileMenu').classList.toggle('hidden');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('profileMenu');
+        if (!e.target.closest('.relative')) {
+            menu.classList.add('hidden');
+        }
+    });
+</script>
+

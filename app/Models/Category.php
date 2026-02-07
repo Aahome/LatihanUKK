@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Category extends Model
+{
+    protected $fillable = [
+        'category_name',
+        'description',
+    ];
+
+    // Relasi ke alat
+    public function tools()
+    {
+        return $this->hasMany(Tool::class);
+    }
+}
