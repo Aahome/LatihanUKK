@@ -31,7 +31,7 @@ class BorrowController extends Controller
             'tool_id'           => 'required|exists:tools,id',
             'borrow_date'       => 'nullable|date',
             'due_date'          => 'required|date|after_or_equal:borrow_date',
-            'status'            => 'required|in:pending,approved,rejected,returned',
+            'status'            => 'required|in:pending,approved,rejected,returned1,returned2',
             'rejection_reason'  => 'nullable|string|max:255',
         ]);
 
@@ -76,13 +76,12 @@ class BorrowController extends Controller
             'tool_id'          => $request->tool_id,
             'borrow_date'      => $request->borrow_date ?? now(),
             'due_date'         => $request->due_date,
-            'status'           => $request->status,
-            'rejection_reason' => $request->status === 'rejected'
-                ? $request->rejection_reason
-                : null,
+            'status'           => in_array($request->status, ['returned1', 'returned2']) ? 'returned' : $request->status,
+            // 'status'           => $request->status,
+            'rejection_reason' => $request->status === 'rejected' ? $request->rejection_reason : null,
         ]);
 
-        if ($request->status === 'returned') {
+        if ($request->status === 'returned2') {
             $today    = Carbon::today();
             $dueDate  = Carbon::parse($borrowing->due_date);
 
@@ -117,15 +116,17 @@ class BorrowController extends Controller
     public function update(Request $request, Borrowing $borrow)
     {
         // dd($request->all());
+
         $validator = Validator::make($request->all(), [
             'user_id'           => 'required|exists:users,id',
             'tool_id'           => 'required|exists:tools,id',
             'borrow_date'       => 'required|date',
             'due_date'          => 'required|date|after_or_equal:borrow_date',
-            'status'            => 'required|in:pending,approved,rejected,returned',
+            'status'            => 'required|in:pending,approved,rejected,returned1,returned2',
             'rejection_reason'  => 'nullable|string|max:255',
         ]);
 
+        // dd(($request->status === 'returned1' || $request->status === 'returned2') ? 'returned' : $request->status);
         // Custom validation
         $validator->after(function ($validator) use ($request) {
             if ($request->status === 'rejected' && empty($request->rejection_reason)) {
@@ -189,22 +190,18 @@ class BorrowController extends Controller
         | UPDATE BORROWING
         |--------------------------------------------------------------------------
         */
-        $isBecomingReturned =
-            $oldStatus !== 'returned' &&
-            $request->status === 'returned';
 
         $borrow->update([
             'user_id'          => $request->user_id,
             'tool_id'          => $request->tool_id,
-            'borrow_date'      => $request->borrow_date,
+            'borrow_date'      => $request->borrow_date ?? now(),
             'due_date'         => $request->due_date,
-            'status'           => $request->status,
-            'rejection_reason' => $request->status === 'rejected'
-                ? $request->rejection_reason
-                : null,
+            'status'           => in_array($request->status, ['returned1', 'returned2']) ? 'returned' : $request->status,
+            // 'status'           => $request->status,
+            'rejection_reason' => $request->status === 'rejected' ? $request->rejection_reason : null,
         ]);
 
-        if ($isBecomingReturned) {
+        if ($oldStatus !== 'returned' && $request->status === 'returned2') {
             // restore stock (only once)
             $newTool->increment('stock');
 
@@ -215,6 +212,16 @@ class BorrowController extends Controller
                     'return_date'  => Carbon::now(),
                     'fine'  => $request->fine,
                 ]);
+            }
+        }
+
+        if ($oldStatus === 'returned' && $borrow->return && !in_array($request->status, ['returned2', 'approved'])) {
+            // restore stock (only once)
+            $newTool->increment('stock');
+
+            // create return record (only if not exists)
+            if ($borrow->return) {
+                $borrow->return->delete();
             }
         }
 

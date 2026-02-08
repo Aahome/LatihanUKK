@@ -84,7 +84,6 @@
                                         default => 'bg-slate-100 text-slate-600',
                                     };
                                 @endphp
-
                                 <span class="px-3 py-1 text-xs rounded-full {{ $statusColor }}">
                                     {{ ucfirst($borrowing->status) }}
                                 </span>
@@ -93,6 +92,14 @@
                                 @if ($borrowing->status === 'rejected')
                                     <div class="mt-1 text-xs text-red-600">
                                         {{ $borrowing->rejection_reason }}
+                                    </div>
+                                @elseif ($borrowing->status === 'returned' && !$borrowing->returnData)
+                                    <div class="mt-1 text-xs text-red-600">
+                                        Unconfirmed
+                                    </div>
+                                @elseif ($borrowing->status === 'returned' && $borrowing->returnData)
+                                    <div class="mt-1 text-xs text-red-600">
+                                        Confirmed
                                     </div>
                                 @endif
                             </td>
@@ -104,9 +111,8 @@
                                         data-user_id="{{ $borrowing->user_id }}"
                                         data-tool_id="{{ $borrowing->tool_id }}"
                                         data-borrow_date="{{ $borrowing->borrow_date }}"
-                                        data-due_date="{{ $borrowing->due_date }}"
-                                        data-fine="{{ $fine }}"
-                                        data-status="{{ $borrowing->status }}"
+                                        data-due_date="{{ $borrowing->due_date }}" data-fine="{{ $fine }}"
+                                        data-status="{{ ($borrowing->status === 'returned' && !$borrowing->returnData) ? 'returned1' : (($borrowing->status === 'returned' && $borrowing->returnData) ? 'returned2' : $borrowing->status)}}"
                                         data-rejection="{{ $borrowing->rejection_reason }}"
                                         onclick="openBorrowEditCard(this)"
                                         class="px-3 py-1 text-xs rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200">

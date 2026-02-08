@@ -78,7 +78,10 @@
                     <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>pending</option>
                     <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
                     <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>approved</option>
-                    <option value="returned" {{ old('status') == 'returned' ? 'selected' : '' }}>returned</option>
+                    <option value="returned1" {{ old('status') == 'returned1' ? 'selected' : '' }}>returned -
+                        unconfirmed</option>
+                    <option value="returned2" {{ old('status') == 'returned2' ? 'selected' : '' }}>returned- confirmed
+                    </option>
                 </select>
                 @error('status')
                     <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
