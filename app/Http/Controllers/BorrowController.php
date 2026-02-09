@@ -29,6 +29,7 @@ class BorrowController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id'           => 'required|exists:users,id',
             'tool_id'           => 'required|exists:tools,id',
+            'quantity'          => 'required|integer',
             'borrow_date'       => 'nullable|date',
             'due_date'          => 'required|date|after_or_equal:borrow_date',
             'status'            => 'required|in:pending,approved,rejected,returned1,returned2',
@@ -63,7 +64,7 @@ class BorrowController extends Controller
         $tool = Tool::findOrFail($request->tool_id);
 
         // If approved → ensure stock available
-        if ($request->status === 'approved' && $tool->stock < 1) {
+        if ($request->status === 'approved' && $tool->stock < 1 || $request->quantity > $tool->stock) {
             return back()
                 ->withErrors(['tool_id' => 'Tool stock is not available'])
                 ->withInput()
@@ -74,6 +75,7 @@ class BorrowController extends Controller
         $borrowing = Borrowing::create([
             'user_id'          => $request->user_id,
             'tool_id'          => $request->tool_id,
+            'quantity'         => $request->quantity,
             'borrow_date'      => $request->borrow_date ?? now(),
             'due_date'         => $request->due_date,
             'status'           => in_array($request->status, ['returned1', 'returned2']) ? 'returned' : $request->status,
@@ -100,7 +102,7 @@ class BorrowController extends Controller
 
         // Decrement stock ONLY if approved
         if ($request->status === 'approved') {
-            $tool->decrement('stock');
+            $tool->decrement('stock', $request->quantity);
         }
 
         activity_log('added new borrow data, Id:' . $borrowing->id);
@@ -120,6 +122,7 @@ class BorrowController extends Controller
         $validator = Validator::make($request->all(), [
             'user_id'           => 'required|exists:users,id',
             'tool_id'           => 'required|exists:tools,id',
+            'quantity'          => 'required|integer',
             'borrow_date'       => 'required|date',
             'due_date'          => 'required|date|after_or_equal:borrow_date',
             'status'            => 'required|in:pending,approved,rejected,returned1,returned2',
@@ -164,7 +167,7 @@ class BorrowController extends Controller
 
         // If switching tool while approved → restore old stock first
         if ($oldStatus === 'approved' && $oldTool->id !== $newTool->id) {
-            $oldTool->increment('stock');
+            $oldTool->increment('stock', $request->quantity);
         }
 
         // If becoming approved → check & decrement
@@ -177,12 +180,12 @@ class BorrowController extends Controller
                     ->with('form_context', 'edit');
             }
 
-            $newTool->decrement('stock');
+            $newTool->decrement('stock', $request->quantity);
         }
 
         // If leaving approved → restore stock
         if ($oldStatus === 'approved' && $request->status !== 'approved') {
-            $oldTool->increment('stock');
+            $oldTool->increment('stock', $request->quantity);
         }
 
         /*
@@ -194,6 +197,7 @@ class BorrowController extends Controller
         $borrow->update([
             'user_id'          => $request->user_id,
             'tool_id'          => $request->tool_id,
+            'quantity'         => $request->quantity,
             'borrow_date'      => $request->borrow_date ?? now(),
             'due_date'         => $request->due_date,
             'status'           => in_array($request->status, ['returned1', 'returned2']) ? 'returned' : $request->status,
@@ -237,7 +241,7 @@ class BorrowController extends Controller
     {
         // Restore stock if approved borrowing is deleted
         if ($borrow->status === 'approved') {
-            $borrow->tool->increment('stock');
+            $borrow->tool->increment('stock', $borrow->quantity);
         }
 
         $borrow->delete();
@@ -262,7 +266,7 @@ class BorrowController extends Controller
             'status' => 'approved',
         ]);
 
-        $borrowing->tool->decrement('stock');
+        $borrowing->tool->decrement('stock', $borrowing->quantity);
 
         return back()->with('success', 'Borrowing approved');
     }

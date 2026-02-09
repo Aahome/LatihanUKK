@@ -188,6 +188,7 @@
 
             document.getElementById('editUserId').value = button.dataset.user_id;
             document.getElementById('editToolId').value = button.dataset.tool_id;
+            document.getElementById('editQuantity').value = button.dataset.quantity;
             document.getElementById('editBorrowDate').value = button.dataset.borrow_date;
             document.getElementById('editDueDate').value = button.dataset.due_date;
             document.getElementById('editFine').value = button.dataset.fine;

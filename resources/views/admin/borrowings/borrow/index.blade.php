@@ -22,6 +22,7 @@
                         <th class="px-6 py-3 text-left">No</th>
                         <th class="px-6 py-3 text-left">Borrower</th>
                         <th class="px-6 py-3 text-left">Tool</th>
+                        <th class="px-6 py-3 text-left">Quantity</th>
                         <th class="px-6 py-3 text-left">Borrow Date</th>
                         <th class="px-6 py-3 text-left">Due Date</th>
                         <th class="px-6 py-3 text-left">Fine</th>
@@ -59,6 +60,10 @@
 
                             <td class="px-6 py-4">
                                 {{ $borrowing->tool->tool_name }}
+                            </td>
+
+                            <td class="px-6 py-4">
+                                {{ $borrowing->quantity }}
                             </td>
 
                             <td class="px-6 py-4">
@@ -110,6 +115,7 @@
                                     <button type="button" data-id="{{ $borrowing->id }}"
                                         data-user_id="{{ $borrowing->user_id }}"
                                         data-tool_id="{{ $borrowing->tool_id }}"
+                                        data-quantity="{{ $borrowing->quantity }}"
                                         data-borrow_date="{{ $borrowing->borrow_date }}"
                                         data-due_date="{{ $borrowing->due_date }}" data-fine="{{ $fine }}"
                                         data-status="{{ ($borrowing->status === 'returned' && !$borrowing->returnData) ? 'returned1' : (($borrowing->status === 'returned' && $borrowing->returnData) ? 'returned2' : $borrowing->status)}}"

@@ -9,6 +9,7 @@ class Borrowing extends Model
     protected $fillable = [
         'user_id',
         'tool_id',
+        'quantity',
         'borrow_date',
         'due_date',
         'status',

@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
-class DefaultUserSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     public function run(): void
     {
@@ -33,6 +33,13 @@ class DefaultUserSeeder extends Seeder
             'name'     => 'Borrower',
             'email'    => 'borrower@gmail.com',
             'password' => Hash::make('borrower123'),
+            'role_id'  => $borrowerRole->id,
+        ]);
+
+        User::create([
+            'name'     => 'Aziz Han XK',
+            'email'    => 'azizhanxk@gmail.com',
+            'password' => Hash::make('admin123'),
             'role_id'  => $borrowerRole->id,
         ]);
     }

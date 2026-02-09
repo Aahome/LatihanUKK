@@ -15,21 +15,21 @@ class ToolSeeder extends Seeder
     public function run(): void
     {
         // later use
-        $electronics = Category::where('category_name', 'Electronics')->first();
-        $handTool    = Category::where('category_name', 'Hand Tool')->first();
+        $electronics = Category::where('category_name', 'Electronics')->firstOrFail();
+        $handTool    = Category::where('category_name', 'Hand Tool')->firstOrFail();
 
         Tool::create([
             'tool_name'   => 'Laptop',
-            // 'category_id' => $electronics->id,
-            'category_id' => 1,
+            'category_id' => $electronics->id,
+            // 'category_id' => 1,
             'stock'       => 67,
             'condition'   => 'good',
         ]);
 
         Tool::create([
             'tool_name'   => 'Screwdriver',
-            // 'category_id' => $handTool->id,
-            'category_id' => 2,
+            'category_id' => $handTool->id,
+            // 'category_id' => 2,
             'stock'       => 20,
             'condition'   => 'good',
         ]);

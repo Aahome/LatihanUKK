@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         // 1. Seed required base data FIRST
         $this->call([
             RoleSeeder::class,
-            DefaultUserSeeder::class,
+            UserSeeder::class,
             CategorySeeder::class,
             ToolSeeder::class,
         ]);

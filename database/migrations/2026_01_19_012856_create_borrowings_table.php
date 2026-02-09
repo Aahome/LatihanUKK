@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tool_id')->constrained()->cascadeOnDelete();
+            $table->integer('quantity');
             $table->date('borrow_date');
             $table->date('due_date');
             $table->enum('status', ['pending','rejected', 'approved', 'returned'])->default('pending');
