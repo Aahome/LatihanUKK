@@ -1,86 +1,102 @@
-@extends('layouts.app')
+<div id="editBorrowCard" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+     {{ $errors->any() && session('form_context') === 'edit' ? '' : 'hidden' }}>
 
-@section('title', 'Edit Borrowing')
+    <section class="bg-white rounded-xl shadow-sm w-3xl">
 
-@section('dashboard-content')
-<div class="flex-1 p-8 max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+            <h3 class="font-semibold text-slate-800">
+                Edit Borrow
+            </h3>
+            <button onclick="closeEditCard()" class="text-slate-400 hover:text-slate-600">
+                ✕
+            </button>
+        </div>
 
-    <!-- Header -->
-    <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-slate-800">
-            Edit Borrowing
-        </h2>
-        <p class="text-sm text-slate-500">
-            Update borrowing details
-        </p>
-    </div>
-
-    <!-- Form -->
-    <section class="bg-white rounded-xl shadow-sm p-6">
-        <form method="POST"
-            action="{{ route('borrower.borrowings.update', $borrowing->id) }}">
+        <!-- Form -->
+        <form id="editForm" method="POST" class="p-6 space-y-5">
             @csrf
             @method('PUT')
 
             <!-- Borrower -->
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Borrower
                 </label>
-                <input type="text"
-                    value="{{ $borrowing->user->name }}"
-                    disabled
+                <input type="text" value="{{ auth()->user()->name }}" disabled
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
             </div>
 
             <!-- Tool -->
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Tool
                 </label>
-                <input type="text"
-                    value="{{ $borrowing->tool->tool_name }}"
-                    disabled
+                <input type="text" id="editToolName" disabled
+                    value="{{ session('form_context') === 'edit' ? old('tool_name') : '' }}"
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
+
+                <input type="hidden" name="tool_id" id="editToolId"
+                       value="{{ old('tool_id') }}">
+
+                @error('tool_id')
+                    <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- Quantity -->
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">
+                    Quantity
+                </label>
+                <input type="number" name="quantity" id="editQuantity" min="1" required
+                    value="{{ session('form_context') === 'edit' ? old('quantity') : '' }}"
+                    class="w-full px-4 py-2 border rounded-lg text-sm">
+
+                @error('quantity')
+                    <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <!-- Borrow Date -->
-            <div class="mb-4">
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Borrow Date
                 </label>
-                <input type="date"
-                    value="{{ $borrowing->borrow_date }}"
-                    disabled
+                <input type="date" name="borrow_date" readonly
+                    value="{{ session('form_context') === 'edit'
+                        ? old('borrow_date')
+                        : '' }}"
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
             </div>
 
             <!-- Due Date -->
-            <div class="mb-6">
+            <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Due Date
                 </label>
-                <input type="date"
-                    name="due_date"
-                    value="{{ $borrowing->due_date }}"
-                    required
-                    class="w-full px-4 py-2 border rounded-lg text-sm
-                           focus:ring focus:ring-blue-200 focus:border-blue-500 outline-none">
+                <input type="date" name="due_date" required
+                    value="{{ session('form_context') === 'edit' ? old('due_date') : '' }}"
+                    class="w-full px-4 py-2 border rounded-lg text-sm">
+
+                @error('due_date')
+                    <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
-            <!-- Action -->
+            <!-- Actions -->
             <div class="flex justify-end gap-3">
-                <a href="{{ route('borrower.borrowings.index') }}"
-                    class="px-5 py-2 text-sm rounded-lg border hover:bg-slate-50">
+                <button type="button"
+                        onclick="closeEditCard()"
+                        class="px-5 py-2 rounded-lg text-sm border border-slate-300 text-slate-600 hover:bg-slate-50">
                     Cancel
-                </a>
+                </button>
 
                 <button type="submit"
-                    class="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">
-                    Update
+                        class="px-5 py-2 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                    Update Borrow
                 </button>
             </div>
         </form>
     </section>
 </div>
-@endsection

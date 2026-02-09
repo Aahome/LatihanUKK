@@ -101,7 +101,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('borrowings/borrow', BorrowController::class)->except('show', 'index', 'create', 'edit');
 
         // Borrowings -> return
-        Route::resource('borrowings/return', ReturnController::class)->except('show', 'index');
+        Route::resource('borrowings/return', ReturnController::class)->except('show', 'index', 'create', 'edit');
 
         // Activity Logs
         Route::get('activity_logs', [ActivityLogController::class, 'index'])

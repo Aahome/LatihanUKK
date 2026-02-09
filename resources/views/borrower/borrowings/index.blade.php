@@ -39,6 +39,19 @@
             </div>
         </div>
 
+        <form method="GET" action="{{ route('borrower.borrowings.index') }}"
+            class="py-4 flex flex-wrap gap-3 items-center">
+
+            <!-- Search Input -->
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search tool name..."
+                class="w-full sm:w-64 px-4 py-2 border rounded-lg text-sm
+                          focus:ring focus:ring-blue-200 focus:border-blue-500 outline-none">
+            <!-- Search Button -->
+            <button type="submit" class="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                Search
+            </button>
+        </form>
+
         <!-- Borrowing Table -->
         <section class="bg-white rounded-xl shadow-sm">
 
@@ -54,6 +67,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left w-12">No</th>
                             <th class="px-6 py-3 text-left">Tool</th>
+                            <th class="px-6 py-3 text-left">Quantity</th>
                             <th class="px-6 py-3 text-left">Borrow Date</th>
                             <th class="px-6 py-3 text-left">Due Date</th>
                             <th class="px-6 py-3 text-left">Fine</th>
@@ -72,6 +86,10 @@
 
                                 <td class="px-6 py-4 font-medium text-slate-800">
                                     {{ $borrowing->tool->tool_name }}
+                                </td>
+
+                                <td class="px-6 py-4 font-medium text-slate-800">
+                                    {{ $borrowing->quantity }}
                                 </td>
 
                                 <td class="px-6 py-4">
@@ -107,10 +125,12 @@
                                     <div class="flex justify-center gap-2">
 
                                         @if ($borrowing->status === 'pending')
-                                            <a href="{{ route('borrower.borrowings.edit', $borrowing->id) }}"
+                                            <button type="button" data-id="{{ $borrowing->id }}"
+                                                data-name="{{ $borrowing->tool->tool_name }}"
+                                                data-quantity="{{ $borrowing->quantity }}" onclick="openEditCard(this)"
                                                 class="px-3 py-1 text-xs rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200">
                                                 Edit
-                                            </a>
+                                            </button>
                                         @endif
 
                                         @if ($borrowing->status === 'approved')
@@ -151,4 +171,45 @@
 
         </section>
     </div>
+
+    <!-- Add and Edit Modal -->
+    @include('borrower.borrowings.edit')
+
+    <script>
+        function openEditCard(button) {
+            const id = button.dataset.id;
+
+            document.getElementById('editForm').action = `/borrower/borrowings/${id}`;
+            document.getElementById('editUserId').value = id;
+
+            document.getElementById('editToolName').value = button.dataset.name;
+            document.getElementById('editQuantity').value = button.dataset.quantity;
+
+            document.getElementById('editBorrowCard').hidden = false;
+        }
+
+        function closeEditCard() {
+            document.getElementById('editBorrowCard').hidden = true;
+        }
+    </script>
+
+    @if (session('open_create'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('createUserCard').hidden = false;
+            });
+        </script>
+    @endif
+
+    @if (session('open_edit') && old('user_id'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const id = "{{ old('user_id') }}";
+                const form = document.getElementById('editForm');
+
+                form.action = `/admin/users/${id}`;
+                document.getElementById('editUserCard').hidden = false;
+            });
+        </script>
+    @endif
 @endsection

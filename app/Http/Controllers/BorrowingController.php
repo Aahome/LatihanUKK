@@ -14,8 +14,22 @@ class BorrowingController extends Controller
     public function index(Request $request)
     {
         /* ===============================
-     * Borrowings (MAIN LIST + SEARCH)
-     * =============================== */
+         * Resolve active table (TAB LOGIC)
+         * =============================== */
+        if (session()->has('view')) {
+            // Validation / edit redirect wins
+            $view = session('view');
+        } elseif ($request->filled('_tab')) {
+            // Search form decides
+            $view = $request->_tab;
+        } else {
+            // Default
+            $view = 'borrow';
+        }
+
+        /* ===============================
+         * Borrowings (SEARCH)
+         * =============================== */
         $borrowings = Borrowing::with(['user', 'tool'])
             ->when($request->filled('borrowSearch'), function ($q) use ($request) {
                 $q->whereHas('user', function ($u) use ($request) {
@@ -28,7 +42,9 @@ class BorrowingController extends Controller
             ->latest()
             ->get();
 
-
+        /* ===============================
+         * Returns (SEARCH)
+         * =============================== */
         $returns = ReturnModel::with([
             'borrowing.user',
             'borrowing.tool'
@@ -46,31 +62,20 @@ class BorrowingController extends Controller
             ->latest()
             ->get();
 
-
-
-
         /* ===============================
-     * Borrowers (ONLY for borrow form)
-     * =============================== */
+         * Supporting data
+         * =============================== */
         $borrowers = User::where('role_id', 3)->get();
-
-
-        /* ===============================
-     * Tools (for filter + forms)
-     * =============================== */
-        $tools = Tool::all();
-
-        /* ===============================
-     * Roles (if still needed elsewhere)
-     * =============================== */
-        $roles = Role::all();
+        $tools     = Tool::all();
+        $roles     = Role::all();
 
         return view('admin.borrowings.index', compact(
             'borrowings',
             'returns',
             'borrowers',
             'tools',
-            'roles'
+            'roles',
+            'view'
         ));
     }
 }

@@ -46,8 +46,9 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Quantity
                 </label>
-                <input type="number" min="1" name="quantity" id="editQuantity" required
-                    class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
+                <input type="number" min="1" name="quantity"
+                    value="{{ session('form_context') === 'edit' ? old('quantity') : '' }}" id="editQuantity"
+                    required class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
                 @error('quantity')
                     <p class="text-sm text-red-500 ">{{ $message }}</p>
                 @enderror
@@ -57,6 +58,7 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Borrow Date</label>
                 <input type="date" name="borrow_date" id="editBorrowDate"
+                    value="{{ session('form_context') === 'edit' ? old('borrow_date') : '' }}"
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
                 @error('borrow_date')
                     <p class="text-sm text-red-500 mt-0.5">{{ $message }}</p>
@@ -67,6 +69,7 @@
             <div>
                 <label class="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
                 <input type="date" name="due_date" id="editDueDate"
+                    value="{{ session('form_context') === 'edit' ? old('due_date') : '' }}"
                     class="w-full px-4 py-2 border rounded-lg text-sm">
                 @error('due_date')
                     <p class="text-sm text-red-500 mt-0.5">{{ $message }}</p>
@@ -80,10 +83,7 @@
                     <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>pending</option>
                     <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
                     <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>approved</option>
-                    <option value="returned1" {{ old('status') == 'returned1' ? 'selected' : '' }}>returned -
-                        unconfirmed</option>
-                    <option value="returned2" {{ old('status') == 'returned2' ? 'selected' : '' }}>returned- confirmed
-                    </option>
+                    <option value="returned" {{ old('status') == 'returned' ? 'selected' : '' }}>returned</option>
                 </select>
             </div>
 

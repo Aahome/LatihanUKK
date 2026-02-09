@@ -1,6 +1,5 @@
 <!-- Borrowing Table -->
 <div id="borrowTable">
-
     <section class="bg-white rounded-xl shadow-sm">
 
         <!-- Header -->
@@ -45,7 +44,7 @@
                             } else {
                                 // Not returned yet → calculate live
                                 $lateDays = $today->greaterThan($due) ? $today->diffInDays($due) : 0;
-                                $fine = $lateDays * 5000;
+                                $fine = $lateDays * 5000 * $borrowing->quantity;
                             }
                         @endphp
 
@@ -118,7 +117,7 @@
                                         data-quantity="{{ $borrowing->quantity }}"
                                         data-borrow_date="{{ $borrowing->borrow_date }}"
                                         data-due_date="{{ $borrowing->due_date }}" data-fine="{{ $fine }}"
-                                        data-status="{{ ($borrowing->status === 'returned' && !$borrowing->returnData) ? 'returned1' : (($borrowing->status === 'returned' && $borrowing->returnData) ? 'returned2' : $borrowing->status)}}"
+                                        data-status="{{ $borrowing->status }}"
                                         data-rejection="{{ $borrowing->rejection_reason }}"
                                         onclick="openBorrowEditCard(this)"
                                         class="px-3 py-1 text-xs rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200">

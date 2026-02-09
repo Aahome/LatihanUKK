@@ -45,9 +45,10 @@
         <!-- Search & Filter -->
         <form method="GET" id="borrowSearch" action="{{ route('admin.borrowings.index') }}"
             class="py-4 flex flex-wrap gap-3 items-center">
-            <input type="hidden" name="view" value="borrow">
+            <input type="hidden" name="_tab" value="borrow">
             <!-- Search Input -->
-            <input type="text" name="borrowSearch" value="{{ request('borrowSearch') }}" placeholder="Search user name..."
+            <input type="text" name="borrowSearch" value="{{ request('borrowSearch') }}"
+                placeholder="Search user name..."
                 class="w-full sm:w-64 px-4 py-2 border rounded-lg text-sm
                       focus:ring focus:ring-blue-200 focus:border-blue-500 outline-none">
 
@@ -81,9 +82,10 @@
         <!-- Search & Filter -->
         <form method="GET" id="returnSearch" action="{{ route('admin.borrowings.index') }}"
             class="py-4 flex flex-wrap gap-3 items-center" hidden>
-            <input type="hidden" name="view" value="return">
+            <input type="hidden" name="_tab" value="return">
             <!-- Search Input -->
-            <input type="text" name="returnSearch" value="{{ request('returnSearch') }}" placeholder="Search user name..."
+            <input type="text" name="returnSearch" value="{{ request('returnSearch') }}"
+                placeholder="Search user name..."
                 class="w-full sm:w-64 px-4 py-2 border rounded-lg text-sm
                       focus:ring focus:ring-blue-200 focus:border-blue-500 outline-none">
 
@@ -131,9 +133,7 @@
     </div>
     @include('admin.borrowings.borrow.create')
     @include('admin.borrowings.borrow.edit')
-    {{-- @include('admin.borrowings.return.create')
-@include('admin.borrowings.return.edit') --}}
-
+    @include('admin.borrowings.return.edit')
     <script>
         function openBorrowTable() {
             document.getElementById('borrowTable').hidden = false;
@@ -219,19 +219,16 @@
         function openReturnEditCard(button) {
             const id = button.dataset.id;
 
-            document.getElementById('editForm').action = `/admin/borrow/${id}`;
-            // document.getElementById('editToolId').value = id;
+            document.getElementById('editReturnForm').action = `/admin/borrowings/return/${id}`;
+            document.getElementById('editReturnId').value = id;
 
-            // document.getElementById('editToolName').value = button.dataset.name;
-            // document.getElementById('editToolCategory').value = button.dataset.category;
-            // document.getElementById('editToolCondition').value = button.dataset.condition;
-            // document.getElementById('editToolStock').value = button.dataset.stock;
+            document.getElementById('editReturnDate').value = button.dataset.name;
 
-            document.getElementById('editBorrowCard').hidden = false;
+            document.getElementById('editReturnCard').hidden = false;
         }
 
         function closeReturnEditCard() {
-            document.getElementById('editBorrowCard').hidden = true;
+            document.getElementById('editReturnCard').hidden = true;
         }
     </script>
 
@@ -251,29 +248,38 @@
                 const id = "{{ old('borrow_id') }}";
                 const form = document.getElementById('editForm');
 
-                form.action = `/admin/borrow/${id}`;
+                form.action = `/admin/borrowings/borrow/${id}`;
                 document.getElementById('editBorrowCard').hidden = false;
+            });
+        </script>
+    @endif
+
+    @if (session('open_edit') && old('return_id'))
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const id = "{{ old('return_id') }}";
+                const form = document.getElementById('editReturnForm');
+
+                form.action = `/admin/borrowings/return/${id}`;
+                openReturnTable();
+                closeBorrowTable();
+                document.getElementById('editReturnCard').hidden = false;
             });
         </script>
     @endif
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const view = "{{ request('view', 'borrow') }}";
+            const view = "{{ $view }}";
 
             if (view === 'return') {
-                closeBorrowTable();
                 openReturnTable();
-                document.getElementById('borrowSearch').hidden = true;
-                document.getElementById('returnSearch').hidden = false;
+                closeBorrowTable();
             } else {
-                closeReturnTable();
                 openBorrowTable();
-                document.getElementById('returnSearch').hidden = true;
-                document.getElementById('borrowSearch').hidden = false;
+                closeReturnTable();
             }
         });
     </script>
-
 
 @endsection

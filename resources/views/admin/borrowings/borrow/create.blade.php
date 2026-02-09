@@ -49,7 +49,8 @@
                 <label class="block text-sm font-medium text-slate-700 mb-1">
                     Quantity
                 </label>
-                <input type="number" name="quantity" required
+                <input type="number" name="quantity"
+                    value="{{ session('form_context') === 'create' ? old('quantity') : '' }}" required
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
                 @error('quantity')
                     <p class="text-sm text-red-500 ">{{ $message }}</p>
@@ -90,10 +91,7 @@
                     <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>pending</option>
                     <option value="rejected" {{ old('status') == 'rejected' ? 'selected' : '' }}>rejected</option>
                     <option value="approved" {{ old('status') == 'approved' ? 'selected' : '' }}>approved</option>
-                    <option value="returned1" {{ old('status') == 'returned1' ? 'selected' : '' }}>returned -
-                        unconfirmed</option>
-                    <option value="returned2" {{ old('status') == 'returned2' ? 'selected' : '' }}>returned- confirmed
-                    </option>
+                    <option value="returned" {{ old('status') == 'returned' ? 'selected' : '' }}>returned</option>
                 </select>
                 @error('status')
                     <p class="text-sm text-red-500 mt-1">{{ $message }}</p>

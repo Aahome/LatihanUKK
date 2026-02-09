@@ -47,6 +47,7 @@
                             <th class="px-6 py-3 text-left">No</th>
                             <th class="px-6 py-3 text-left">Borrower</th>
                             <th class="px-6 py-3 text-left">Tool</th>
+                            <th class="px-6 py-3 text-left">Quantity</th>
                             <th class="px-6 py-3 text-left">Due Date</th>
                             <th class="px-6 py-3 text-left">Late (Days)</th>
                             <th class="px-6 py-3 text-left">Returned</th>
@@ -69,7 +70,7 @@
                                 } else {
                                     // Not returned yet → calculate live
                                     $lateDays = $today->greaterThan($due) ? $today->diffInDays($due) : 0;
-                                    $fine = $lateDays * 5000;
+                                    $fine = $lateDays * 5000 * $borrowing->quantity;
                                 }
                             @endphp
 
@@ -84,6 +85,10 @@
 
                                 <td class="px-6 py-4">
                                     {{ $borrowing->tool->tool_name }}
+                                </td>
+
+                                <td class="px-6 py-4">
+                                    {{ $borrowing->quantity }}
                                 </td>
 
                                 <td class="px-6 py-4">

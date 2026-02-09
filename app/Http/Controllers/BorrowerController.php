@@ -7,6 +7,7 @@ use App\Models\Tool;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
 class BorrowerController extends Controller
@@ -33,26 +34,20 @@ class BorrowerController extends Controller
     /* =========================
      | BORROWING LIST
      ========================= */
-    public function index()
+    public function index(Request $request)
     {
         $borrowings = Borrowing::with(['tool', 'returnData'])
-            ->where('user_id', Auth::user()->id)
+            ->where('user_id', Auth::id())
+            ->when($request->filled('search'), function ($q) use ($request) {
+                $q->whereHas('tool', function ($t) use ($request) {
+                    $t->where('tool_name', 'like', '%' . $request->search . '%');
+                });
+            })
             ->latest()
             ->get();
 
-        return view('borrower.borrowings.index', compact('borrowings'));
-    }
 
-    /* =========================
-     | CREATE FORM
-     ========================= */
-    public function create(Tool $tool)
-    {
-        return view('borrower.borrowings.create', [
-            'tool' => $tool,
-            'user' => Auth::user(),
-            'today' => Carbon::today()->toDateString()
-        ]);
+        return view('borrower.borrowings.index', compact('borrowings'));
     }
 
     /* =========================
@@ -60,26 +55,41 @@ class BorrowerController extends Controller
      ========================= */
     public function store(Request $request, Tool $tool)
     {
-        $request->validate([
-            'due_date' => ['required', 'date', 'after_or_equal:today'],
+        $validator = Validator::make($request->all(), [
+            'quantity' => 'required|integer|min:1',
+            'due_date' => 'required|date|after_or_equal:today',
         ]);
 
-        if ($tool->stock < 1) {
-            return back()->with('error', 'Tool is out of stock.');
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('open_create', true)
+                ->with('form_context', 'create');
+        }
+
+        if ($tool->stock < $request->quantity) {
+            return back()
+                ->with('error', 'Not enough stock.')
+                ->withInput()
+                ->with('open_create', true)
+                ->with('form_context', 'create');
         }
 
         Borrowing::create([
-            'user_id'     => Auth::user()->id,
+            'user_id'     => Auth::id(),
             'tool_id'     => $tool->id,
+            'quantity'    => $request->quantity,
             'borrow_date' => Carbon::today(),
-            'due_date'    => $request->due_date,
-            'status'      => 'pending',
+            'due_date'   => $request->due_date,
+            'status'     => 'pending',
         ]);
 
         return redirect()
             ->route('borrower.borrowings.index')
             ->with('success', 'Borrowing request submitted.');
     }
+
 
     /* =========================
      | SHOW DETAILS (OPTIONAL)
@@ -90,48 +100,46 @@ class BorrowerController extends Controller
 
         return view('borrower.borrowings.show', compact('borrowing'));
     }
-    /* =========================
-    | EDIT BORROWING (ONLY PENDING)
-    ========================= */
-    public function edit(Borrowing $borrowing)
-    {
-        // Ownership check
-        abort_if($borrowing->user_id !== Auth::user()->id, 403);
-
-        // Only pending borrowings can be edited
-        if ($borrowing->status !== 'pending') {
-            return redirect()
-                ->route('borrower.borrowings.index')
-                ->withErrors(['error' => 'Only pending borrowings can be edited.']);
-        }
-
-        return view('borrower.borrowings.edit', [
-            'borrowing' => $borrowing,
-            'tool'      => $borrowing->tool,
-            'user'      => Auth::user(),
-        ]);
-    }
 
     /* =========================
     | UPDATE BORROWING (ONLY PENDING)
     ========================= */
     public function update(Request $request, Borrowing $borrowing)
     {
-        // Ownership check
-        abort_if($borrowing->user_id !== Auth::user()->id, 403);
-
-        // Only pending borrowings can be updated
         if ($borrowing->status !== 'pending') {
-            return back()->withErrors([
-                'error' => 'Only pending borrowings can be updated.'
-            ]);
+            return back()->with('error', 'Only pending borrowings can be updated.');
         }
 
-        $request->validate([
-            'due_date' => ['required', 'date', 'after_or_equal:today'],
+        $validator = Validator::make($request->all(), [
+            'quantity' => 'required|integer|min:1',
+            'due_date' => 'required|date|after_or_equal:today',
         ]);
 
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('open_edit', true)
+                ->with('form_context', 'edit')
+                ->withInput(['borrow_id' => $borrowing->id]);
+        }
+
+        // 🔎 Stock delta logic
+        $currentQty = $borrowing->quantity;
+        $newQty     = $request->quantity;
+        $diff       = $newQty - $currentQty;
+
+        if ($diff > 0 && $borrowing->tool->stock < $diff) {
+            return back()
+                ->with('error', 'Not enough stock.')
+                ->withInput()
+                ->with('open_edit', true)
+                ->with('form_context', 'edit')
+                ->withInput(['borrow_id' => $borrowing->id]);
+        }
+
         $borrowing->update([
+            'quantity' => $newQty,
             'due_date' => $request->due_date,
         ]);
 
@@ -139,6 +147,7 @@ class BorrowerController extends Controller
             ->route('borrower.borrowings.index')
             ->with('success', 'Borrowing updated successfully.');
     }
+
 
     public function return(Borrowing $borrowing)
     {

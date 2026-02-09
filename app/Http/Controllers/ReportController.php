@@ -12,7 +12,7 @@ class ReportController extends Controller
     public function borrowings()
     {
         $borrowings = Borrowing::with(['user', 'tool'])
-            ->whereIn('status', ['pending', 'approved', 'rejected'])
+            ->whereIn('status', ['pending', 'approved', 'rejected','returned'])
             ->orderBy('borrow_date')
             ->get();
 
@@ -26,30 +26,30 @@ class ReportController extends Controller
 
     public function returns()
     {
-        $borrowings = Borrowing::with(['user', 'tool', 'return'])
+        $borrowings = Borrowing::with(['user', 'tool', 'returnData'])
             ->where('status', 'returned')
             ->orderBy('due_date')
             ->get();
 
-        $pdf = Pdf::loadView('reports.returns', [
+        $pdf = Pdf::loadView('staff.reports.returns', [
             'borrowings' => $borrowings,
             'date' => Carbon::now()->format('d M Y'),
         ]);
 
-        return $pdf->download('return-report.pdf');
+        return $pdf->stream('return-report.pdf'); // preview
     }
 
     public function all()
     {
-        $borrowings = Borrowing::with(['user', 'tool'])
+        $borrowings = Borrowing::with(['user', 'tool', 'return'])
             ->orderBy('borrow_date')
             ->get();
 
-        $pdf = Pdf::loadView('reports.all', [
+        $pdf = Pdf::loadView('staff.reports.all', [
             'borrowings' => $borrowings,
             'date' => Carbon::now()->format('d M Y'),
         ]);
 
-        return $pdf->download('full-report.pdf');
+        return $pdf->stream('full-report.pdf'); // preview
     }
 }

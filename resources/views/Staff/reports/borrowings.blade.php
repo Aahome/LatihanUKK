@@ -19,6 +19,7 @@
             <th>No</th>
             <th>Borrower</th>
             <th>Tool</th>
+            <th>Quantity</th>
             <th>Borrow Date</th>
             <th>Due Date</th>
             <th>Status</th>
@@ -30,6 +31,7 @@
             <td>{{ $loop->iteration }}</td>
             <td>{{ $b->user->name }}</td>
             <td>{{ $b->tool->tool_name }}</td>
+            <td>{{ $b->quantity }}</td>
             <td>{{ \Carbon\Carbon::parse($b->borrow_date)->format('d M Y') }}</td>
             <td>{{ \Carbon\Carbon::parse($b->due_date)->format('d M Y') }}</td>
             <td>{{ ucfirst($b->status) }}</td>

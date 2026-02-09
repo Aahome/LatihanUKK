@@ -1,5 +1,6 @@
 <!-- Return Table -->
-<div id="returnTable" hidden>
+<div id="returnTable">
+
     <section class="bg-white rounded-xl shadow-sm">
 
         <div class="px-6 py-4 border-b border-slate-200">
@@ -16,7 +17,7 @@
                         <th class="px-6 py-3 text-left">Return Date</th>
                         <th class="px-6 py-3 text-left">Late (Days)</th>
                         <th class="px-6 py-3 text-left">Fine</th>
-                        <th class="px-6 py-3 text-left">Status</th>
+                        <th class="px-6 py-3 text-center">Action</th>
                     </tr>
                 </thead>
 
@@ -27,9 +28,7 @@
                             $due = \Carbon\Carbon::parse($borrowing->due_date);
                             $returnDate = \Carbon\Carbon::parse($return->return_date);
 
-                            $lateDays = $returnDate->greaterThan($due)
-                                ? $returnDate->diffInDays($due)
-                                : 0;
+                            $lateDays = $returnDate->greaterThan($due) ? $returnDate->diffInDays($due) : 0;
                         @endphp
 
                         <tr class="hover:bg-slate-50">
@@ -55,14 +54,32 @@
                                 Rp {{ number_format($return->fine, 0, ',', '.') }}
                             </td>
 
-                            <td class="px-6 py-4 text-emerald-600 font-semibold">
-                                Confirmed
+                            <!-- Action -->
+                            <td class="px-6 py-4 text-center">
+                                <div class="flex justify-center gap-2">
+                                    <button type="button" 
+                                        data-id="{{ $return->id }}"
+                                        data-borrow_date="{{ $return->return_date }}"
+                                        onclick="openReturnEditCard(this)"
+                                        class="px-3 py-1 text-xs rounded-md bg-amber-100 text-amber-700 hover:bg-amber-200">
+                                        Edit
+                                    </button>
+
+                                    <form action="{{ route('admin.return.destroy', $borrowing->id) }}" method="POST"
+                                        onsubmit="return confirm('Delete this user?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="px-3 py-1 text-xs rounded-md bg-red-100 text-red-700 hover:bg-red-200">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7"
-                                class="px-6 py-6 text-center text-slate-500">
+                            <td colspan="7" class="px-6 py-6 text-center text-slate-500">
                                 No return data found.
                             </td>
                         </tr>
