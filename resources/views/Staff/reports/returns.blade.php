@@ -37,20 +37,22 @@
                 <th>Borrower</th>
                 <th>Tool</th>
                 <th>Quantity</th>
-                <th>Borrow Date</th>
-                <th>Due Date</th>
                 <th>Return Date</th>
+                <th>Late Day(s)</th>
                 <th>Fine</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($borrowings as $b)
                 @php
-                    $borrowing = $return->borrowing;
-                    $due = \Carbon\Carbon::parse($borrowing->due_date);
-                    $returnDate = \Carbon\Carbon::parse($return->return_date);
+                    // $due = \Carbon\Carbon::parse($b->due_date);
+                    // $returnDate = \Carbon\Carbon::parse($b->return_date);
 
+                    // $lateDays = $returnDate->greaterThan($due) ? $returnDate->diffInDays($due) : 0;
+                    $due = \Carbon\Carbon::parse($b->due_date);
+                    $returnDate = \Carbon\Carbon::parse($b->returnData->return_date);
                     $lateDays = $returnDate->greaterThan($due) ? $returnDate->diffInDays($due) : 0;
+
                 @endphp
 
                 <tr>
@@ -58,10 +60,8 @@
                     <td>{{ $b->user->name }}</td>
                     <td>{{ $b->tool->tool_name }}</td>
                     <td>{{ $b->quantity }}</td>
-                    <td>{{ $lateDays }}</td>
-                    <td>{{ \Carbon\Carbon::parse($b->borrow_date)->format('d M Y') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($b->due_date)->format('d M Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($b->return_date)->format('d M Y') }}</td>
+                    <td>{{ $lateDays }}</td>
                     <td>Rp {{ number_format($b->returnData->fine ?? 0) }}</td>
                 </tr>
             @endforeach
@@ -71,26 +71,3 @@
 </body>
 
 </html>
-
-@php
-    $borrowing = $return->borrowing;
-    $due = \Carbon\Carbon::parse($borrowing->due_date);
-    $returnDate = \Carbon\Carbon::parse($return->return_date);
-
-    $lateDays = $returnDate->greaterThan($due) ? $returnDate->diffInDays($due) : 0;
-@endphp
-
-<tr class="hover:bg-slate-50">
-    <td class="px-6 py-4">{{ $loop->iteration }}</td>
-
-    <td class="px-6 py-4 font-medium">
-        {{ $borrowing->user->name }}
-    </td>
-
-    <td class="px-6 py-4">
-        {{ $borrowing->tool->tool_name }}
-    </td>
-
-    <td class="px-6 py-4">
-        {{ $return->return_date }}
-    </td>

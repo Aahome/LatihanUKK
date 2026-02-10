@@ -41,7 +41,7 @@ class ReportController extends Controller
 
     public function all()
     {
-        $borrowings = Borrowing::with(['user', 'tool', 'return'])
+        $borrowings = Borrowing::with(['user', 'tool', 'returnData'])
             ->orderBy('borrow_date')
             ->get();
 

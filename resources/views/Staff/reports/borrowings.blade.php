@@ -2,43 +2,86 @@
 <html>
 <head>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #333; padding: 6px; }
-        th { background: #eee; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 6px;
+        }
+
+        th {
+            background: #eee;
+        }
+
+        /* ONLY for centering status column */
+        .center {
+            text-align: center;
+        }
     </style>
 </head>
+
 <body>
 
-<h2>Borrowing Report</h2>
-<p>Date: {{ $date }}</p>
+    <h2>Borrowing Report</h2>
+    <p>Date: {{ $date }}</p>
 
-<table>
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Borrower</th>
-            <th>Tool</th>
-            <th>Quantity</th>
-            <th>Borrow Date</th>
-            <th>Due Date</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($borrowings as $b)
-        <tr>
-            <td>{{ $loop->iteration }}</td>
-            <td>{{ $b->user->name }}</td>
-            <td>{{ $b->tool->tool_name }}</td>
-            <td>{{ $b->quantity }}</td>
-            <td>{{ \Carbon\Carbon::parse($b->borrow_date)->format('d M Y') }}</td>
-            <td>{{ \Carbon\Carbon::parse($b->due_date)->format('d M Y') }}</td>
-            <td>{{ ucfirst($b->status) }}</td>
-        </tr>
-        @endforeach
-    </tbody>
-</table>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Borrower</th>
+                <th>Tool</th>
+                <th>Quantity</th>
+                <th>Borrow Date</th>
+                <th>Due Date</th>
+                <th class="center">Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach ($borrowings as $b)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $b->user->name }}</td>
+                    <td>{{ $b->tool->tool_name }}</td>
+                    <td>{{ $b->quantity }}</td>
+                    <td>{{ \Carbon\Carbon::parse($b->borrow_date)->format('d M Y') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($b->due_date)->format('d M Y') }}</td>
+
+                    <td class="center">
+                        {{ ucfirst($b->status) }}
+
+                        {{-- Rejection reason --}}
+                        @if ($b->status === 'rejected')
+                            <div style="font-size:10px; color:#b91c1c;">
+                                {{ $b->rejection_reason }}
+                            </div>
+
+                        {{-- Return status --}}
+                        @elseif ($b->status === 'returned' && !$b->returnData)
+                            <div style="font-size:10px; color:#b91c1c;">
+                                (Unconfirmed)
+                            </div>
+
+                        @elseif ($b->status === 'returned' && $b->returnData)
+                            <div style="font-size:10px;">
+                                (Confirmed)
+                            </div>
+                        @endif
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 
 </body>
 </html>
