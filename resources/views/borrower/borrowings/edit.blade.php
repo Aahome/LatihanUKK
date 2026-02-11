@@ -1,5 +1,4 @@
-<div id="editBorrowCard" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-     {{ $errors->any() && session('form_context') === 'edit' ? '' : 'hidden' }}>
+<div id="editBorrowCard" class="fixed inset-0 bg-black/40 flex items-center justify-center z-50" hidden>
 
     <section class="bg-white rounded-xl shadow-sm w-3xl">
 
@@ -25,6 +24,7 @@
                 </label>
                 <input type="text" value="{{ auth()->user()->name }}" disabled
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
+                <input type="hidden" name="borrow_id" id="editBorrowId" value="{{ old('borrow_id') }}">
             </div>
 
             <!-- Tool -->
@@ -36,8 +36,6 @@
                     value="{{ session('form_context') === 'edit' ? old('tool_name') : '' }}"
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
 
-                <input type="hidden" name="tool_id" id="editToolId"
-                       value="{{ old('tool_id') }}">
 
                 @error('tool_id')
                     <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
@@ -64,9 +62,7 @@
                     Borrow Date
                 </label>
                 <input type="date" name="borrow_date" readonly
-                    value="{{ session('form_context') === 'edit'
-                        ? old('borrow_date')
-                        : '' }}"
+                    value="{{ session('form_context') === 'edit' ? old('borrow_date') : '' }}"
                     class="w-full px-4 py-2 border rounded-lg bg-slate-100 text-sm">
             </div>
 
@@ -86,14 +82,13 @@
 
             <!-- Actions -->
             <div class="flex justify-end gap-3">
-                <button type="button"
-                        onclick="closeEditCard()"
-                        class="px-5 py-2 rounded-lg text-sm border border-slate-300 text-slate-600 hover:bg-slate-50">
+                <button type="button" onclick="closeEditCard()"
+                    class="px-5 py-2 rounded-lg text-sm border border-slate-300 text-slate-600 hover:bg-slate-50">
                     Cancel
                 </button>
 
                 <button type="submit"
-                        class="px-5 py-2 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+                    class="px-5 py-2 text-sm rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
                     Update Borrow
                 </button>
             </div>

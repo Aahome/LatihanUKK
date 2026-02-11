@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Tool;
 use Illuminate\Database\Seeder;
-use App\Models\User;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,19 +11,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Seed required base data FIRST
         $this->call([
             RoleSeeder::class,
             UserSeeder::class,
             CategorySeeder::class,
             ToolSeeder::class,
         ]);
-
-        // // 2. Optional: test user WITHOUT admin access
-        // User::factory()->create([
-        //     'name'  => 'Test User',
-        //     'email' => 'test@example.com',
-        //     'role_id' => null, // explicitly no role
-        // ]);
     }
 }

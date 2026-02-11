@@ -180,7 +180,7 @@
             const id = button.dataset.id;
 
             document.getElementById('editForm').action = `/borrower/borrowings/${id}`;
-            document.getElementById('editUserId').value = id;
+            document.getElementById('editBorrowId').value = id;
 
             document.getElementById('editToolName').value = button.dataset.name;
             document.getElementById('editQuantity').value = button.dataset.quantity;
@@ -196,20 +196,20 @@
     @if (session('open_create'))
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.getElementById('createUserCard').hidden = false;
+                document.getElementById('createBorrowCard').hidden = false;
             });
         </script>
     @endif
 
-    @if (session('open_edit') && old('user_id'))
+    @if (session('open_edit') && old('borrow_id'))
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                const id = "{{ old('user_id') }}";
+                const id = "{{ old('borrow_id') }}";
                 const form = document.getElementById('editForm');
 
-                form.action = `/admin/users/${id}`;
-                document.getElementById('editUserCard').hidden = false;
+                form.action = `/borrower/borrowings/${id}`;
+                document.getElementById('editBorrowCard').hidden = false;
             });
         </script>
-    @endif
+    @endif 
 @endsection

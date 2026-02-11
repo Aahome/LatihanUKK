@@ -6,18 +6,10 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    // public function AdminIndex()
-    // {
-    //     return view('admin.users.index', [
-    //         'users' => User::all()
-    //     ]);
-    // }
-
     public function index(Request $request)
     {
 
@@ -103,5 +95,12 @@ class UserController extends Controller
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User updated successfully.');
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+
+        return back()->with('success', 'User deleted');
     }
 }
